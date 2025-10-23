@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/useUserRole";
+import { supabase } from "@/lib/supabase/client";
 
 const Index = () => {
   const [surveyCompleted, setSurveyCompleted] = useState(false);
@@ -36,10 +37,9 @@ const Index = () => {
   //   );
   // }
 
-  const handleLogout = () => {
-    // Lógica de cierre de sesión
-    toast.success("Has cerrado sesión exitosamente");
-    navigate("/auth");
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) toast.error("Error al cerrar sesión: " + error.message);
   };
 
   const handleSurveyComplete = () => {
