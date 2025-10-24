@@ -6,6 +6,11 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase/client";
 import { Separator } from "@/components/ui/separator";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -19,7 +24,23 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [passwordError, setPasswordError] = useState("");
+
   const navigate = useNavigate();
+
+  const validatePassword = (pwd: string) => {
+    const hasUpperCase = /[A-Z]/.test(pwd);
+
+    const hasNumber = /[0-9]/.test(pwd);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(pwd);
+    const hasMinLength = pwd.length >= 8;
+    if (!hasMinLength) return "Minimo 8 caracteres";
+    if (!hasUpperCase) return "Debe contener al menos una letra mayúscula";
+    if (!hasNumber) return "Debe contener al menos un número";
+    if (!hasSpecialChar) return "Debe contener al menos un carácter especial";
+    return "";
+  };
 
   useEffect(() => {
     const checkSession = async () => {
@@ -33,7 +54,17 @@ const Auth = () => {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isLogin) {
+      const error = validatePassword(password);
+      if (error) {
+        setPasswordError(error);
+        return;
+      }
+    }
+
     setLoading(true);
+    setPasswordError("");
 
     try {
       if (isLogin) {
@@ -65,7 +96,8 @@ const Auth = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: "https://mindme.vercel.app/survey",
+          redirectTo: "https://mindme.vercel.app/auth/callback",
+          skipBrowserRedirect: false,
         },
       });
       if (error) throw error;
@@ -112,21 +144,74 @@ const Auth = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña</Label>
+
               <Input
                 id="password"
                 type="password"
                 placeholder="••••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (!isLogin) {
+                    setPasswordError(validatePassword(e.target.value));
+                  }
+                }}
                 required
-                minLength={6}
-                className="transition-all focus:shadow-sm"
+                minLength={8}
+                className={`transition-all focus:shadow-sm ${
+                  passwordError ? "border-destructive" : ""
+                }`}
               />
+              {!isLogin && (
+                <div className="text-xs space-y-1 mt-2">
+                  <p
+                    className={`${
+                      password.length >= 8
+                        ? "text-green-600"
+                        : "text-muted-foreground"
+                    } flex items-center gap-1`}
+                  >
+                    {password.length >= 8 ? "✓" : "-"} Mínimo 8 caracteres
+                  </p>
+                  <p
+                    className={`${
+                      /[A-Z]/.test(password)
+                        ? "text-green-600"
+                        : "text-muted-foreground"
+                    } flex items-center gap-1`}
+                  >
+                    {/[A-Z]/.test(password) ? "✓" : "-"} Al menos 1 mayúscula
+                  </p>
+                  <p
+                    className={`${
+                      /[0-9]/.test(password)
+                        ? "text-green-600"
+                        : "text-muted-foreground"
+                    } flex items-center gap-1`}
+                  >
+                    {/[0-9]/.test(password) ? "✓" : "-"} Al menos 1 número
+                  </p>
+                  <p
+                    className={`${
+                      /[!@#$%^&*(),.?":{}|<>]/.test(password)
+                        ? "text-green-600"
+                        : "text-muted-foreground"
+                    } flex items-center gap-1`}
+                  >
+                    {/[!@#$%^&*(),.?":{}|<>]/.test(password) ? "✓" : "-"} Al
+                    menos 1 carácter especial
+                  </p>
+                </div>
+              )}
+
+              {passwordError && (
+                <p className="text-xs text-destructive">{passwordError}</p>
+              )}
             </div>
             <Button
               type="submit"
               className="w-full bg-primary hover:opacity-90 transition-opacity"
-              disabled={loading}
+              disabled={loading || (!isLogin && passwordError !== "")}
             >
               {loading
                 ? "Cargando..."
