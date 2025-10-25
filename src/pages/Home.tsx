@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/store/auth";
 import {
   Card,
   CardContent,
@@ -20,22 +21,37 @@ import {
 const Home = () => {
   const navigate = useNavigate();
 
+  const { user, loading: authLoading, signOut } = useAuthStore();
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (user) {
+      await signOut();
+      navigate("/");
+    } else {
+      navigate("/auth");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/5">
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
+          <div
+            style={{ cursor: "pointer" }}
+            className="flex items-center gap-2"
+          >
             <div>
               <img src="/logo.png" alt="Logo" className="w-8 h-8" />
             </div>
-            <h1 className="text-xl font-bold">Mi Bienestar Diario</h1>
+            <h1 className="text-xl font-bold">MindMe</h1>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate("/auth")}>
-              Iniciar Sesión
+            <Button variant="outline" onClick={handleAuth}>
+              {user ? "Cerrar Sesión" : "Iniciar Sesión"}
             </Button>
-            <Button onClick={() => navigate("/auth")}>
+            <Button onClick={() => navigate("/survey")}>
               Comenzar
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
@@ -59,7 +75,7 @@ const Home = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button
               size="lg"
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/survey")}
               className="text-base"
             >
               Empezar Ahora
@@ -68,7 +84,7 @@ const Home = () => {
             <Button
               size="lg"
               variant="outline"
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/survey")}
               className="text-base"
             >
               Información
@@ -81,7 +97,7 @@ const Home = () => {
       {/* <section className="container mx-auto px-4 py-12 md:py-20">
         <div className="text-center mb-12">
           <h3 className="text-2xl md:text-3xl font-bold mb-4">
-            ¿Por qué elegir Mi Bienestar Diario?
+            ¿Por qué elegir estar Diario?
           </h3>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Herramientas simples pero poderosas para tu bienestar
@@ -177,7 +193,7 @@ const Home = () => {
       {/* Footer */}
       <footer className="fixed bottom-0 left-0 right-0 border-t border-border/50 bg-card/50 backdrop-blur-sm py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2025 Mi Bienestar Diario. Todos los derechos reservados.</p>
+          <p>© 2025 MindMe. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>

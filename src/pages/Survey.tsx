@@ -19,9 +19,15 @@ import {
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/lib/supabase/client";
+import { useAuthStore } from "@/store/auth";
 
 const Index = () => {
   const [surveyCompleted, setSurveyCompleted] = useState(false);
+  // Usa selectores de Zustand para evitar posibles problemas de hooks y re-render masivos
+  const user = useAuthStore((s) => s.user);
+  const authLoading = useAuthStore((s) => s.loading);
+  const isAdmin = useAuthStore((s) => s.isAdmin);
+  const signOut = useAuthStore((s) => s.signOut);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   //const { isAdmin, loading: roleLoading } = useUserRole(user?.id);
@@ -38,8 +44,12 @@ const Index = () => {
   // }
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) toast.error("Error al cerrar sesión: " + error.message);
+    try {
+      await signOut();
+      navigate("/");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
   };
 
   const handleSurveyComplete = () => {
@@ -51,17 +61,21 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/5">
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
+          <div
+            onClick={() => navigate("/")}
+            style={{ cursor: "pointer" }}
+            className="flex items-center gap-2"
+          >
             <img
               src="/logo.png"
               alt="logo"
               className="w-9 h-9 text-primary-foreground"
             />
 
-            <h1 className="text-xl font-bold">Mi Bienestar Diario</h1>
+            <h1 className="text-xl font-bold">MindMe</h1>
           </div>
           <div className="flex gap-2">
-            {/* {
+            {isAdmin && (
               <Button
                 variant="outline"
                 onClick={() => navigate("/dashboard")}
@@ -70,7 +84,8 @@ const Index = () => {
                 <LayoutDashboard className="w-4 h-4" />
                 <span className="hidden sm:inline">Dashboard</span>
               </Button>
-            } */}
+            )}
+
             <Button variant="outline" onClick={handleLogout} className="gap-2">
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">Cerrar Sesión</span>
@@ -120,7 +135,7 @@ const Index = () => {
       </main>
       <footer className="border-t border-border/50 bg-card/50 backdrop-blur-sm py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2025 Mi Bienestar Diario. Todos los derechos reservados.</p>
+          <p>© 2025 MindMe. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>

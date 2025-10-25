@@ -131,9 +131,7 @@ const SurveyForm = ({ onComplete }: SurveyFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label>
-              ¿Tienes menstruación actualmente o te llegó esta semana?
-            </Label>
+            <Label>¿Tienes la menstruación actualmente?</Label>
             <RadioGroup
               onValueChange={(v) =>
                 setFormData({ ...formData, has_menstruation: v === "si" })
@@ -181,7 +179,7 @@ const SurveyForm = ({ onComplete }: SurveyFormProps) => {
             </div>
           )}
 
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label>¿En los próximos 7 días es probable que te llegue?</Label>
             <RadioGroup
               onValueChange={(v) =>
@@ -200,7 +198,7 @@ const SurveyForm = ({ onComplete }: SurveyFormProps) => {
                 <Label htmlFor="next7-no">No</Label>
               </div>
             </RadioGroup>
-          </div>
+          </div> */}
 
           <div className="space-y-2">
             <Label>¿Hace 7 días te llegó la menstruación?</Label>
@@ -229,7 +227,9 @@ const SurveyForm = ({ onComplete }: SurveyFormProps) => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>¿Sientes cambios marcados en tu estado de ánimo?</Label>
+            <Label>
+              ¿Sientes cambios marcados en tu estado de ánimo el dia de hoy?
+            </Label>
             <div className="space-y-2">
               {[
                 "Cambios bruscos de humor",
@@ -255,7 +255,7 @@ const SurveyForm = ({ onComplete }: SurveyFormProps) => {
           </div>
 
           <ScaleInput
-            label="¿Cuál fue tu nivel de irritabilidad esta semana? (1-10)"
+            label="¿Cuál fue tu nivel de irritabilidad hoy? (1-10)"
             value={formData.irritability_level}
             onChange={(v) =>
               setFormData({ ...formData, irritability_level: v })
@@ -263,19 +263,19 @@ const SurveyForm = ({ onComplete }: SurveyFormProps) => {
           />
 
           <ScaleInput
-            label="¿Cuál fue tu nivel de enojo esta semana? (1-10)"
+            label="¿Cuál fue tu nivel de enojo hoy? (1-10)"
             value={formData.anger_level}
             onChange={(v) => setFormData({ ...formData, anger_level: v })}
           />
 
           <ScaleInput
-            label="¿Qué tan deprimida o triste te has sentido? (1-10)"
+            label="¿Qué tan deprimida o triste te has sentido hoy? (1-10)"
             value={formData.depression_level}
             onChange={(v) => setFormData({ ...formData, depression_level: v })}
           />
 
           <ScaleInput
-            label="¿Cuál fue tu nivel de ansiedad esta semana? (1-10)"
+            label="¿Cuál fue tu nivel de ansiedad hoy? (1-10)"
             value={formData.anxiety_level}
             onChange={(v) => setFormData({ ...formData, anxiety_level: v })}
           />
@@ -287,7 +287,7 @@ const SurveyForm = ({ onComplete }: SurveyFormProps) => {
           />
 
           <ScaleInput
-            label="¿Sientes que tus relaciones interpersonales fueron conflictivas? (1-10)"
+            label="¿Sientes que tus relaciones interpersonales fueron conflictivas el dia de hoy? (1-10)"
             value={formData.interpersonal_conflicts_level}
             onChange={(v) =>
               setFormData({ ...formData, interpersonal_conflicts_level: v })
@@ -348,7 +348,7 @@ const SurveyForm = ({ onComplete }: SurveyFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label>¿Te sentiste somnoliento esta semana?</Label>
+            <Label>¿Te sentiste somnolienta el dia de hoy?</Label>
             <RadioGroup
               onValueChange={(v) =>
                 setFormData({ ...formData, felt_sleepy: v === "si" })
@@ -376,13 +376,13 @@ const SurveyForm = ({ onComplete }: SurveyFormProps) => {
           )}
 
           <ScaleInput
-            label="¿Cuál fue tu nivel de fatiga esta semana? (1-10)"
+            label="¿Cuál fue tu nivel de fatiga el día de hoy? (1-10)"
             value={formData.fatigue_level}
             onChange={(v) => setFormData({ ...formData, fatigue_level: v })}
           />
 
           <div className="space-y-2">
-            <Label>¿Cuál fue tu nivel de energía durante esta semana?</Label>
+            <Label>¿Cuál fue tu nivel de energía durante el día de hoy?</Label>
             <RadioGroup
               onValueChange={(v) =>
                 setFormData({ ...formData, energy_level: v })
@@ -403,7 +403,7 @@ const SurveyForm = ({ onComplete }: SurveyFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label>Notaste cambios físicos:</Label>
+            <Label>Notaste cambios físicos el dia de hoy:</Label>
             <div className="space-y-2">
               {[
                 "Sensibilidad o inflamación en los senos",
@@ -428,7 +428,9 @@ const SurveyForm = ({ onComplete }: SurveyFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label>¿Tuviste cambios notables en tu apetito?</Label>
+            <Label>
+              ¿Tuviste cambios notables en tu apetito el dia de hoy?
+            </Label>
             <RadioGroup
               onValueChange={(v) =>
                 setFormData({ ...formData, appetite_changes: v === "si" })
@@ -456,7 +458,7 @@ const SurveyForm = ({ onComplete }: SurveyFormProps) => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>¿Te sentiste abrumada o fuera de control?</Label>
+            <Label>¿Te sentiste abrumada o fuera de control esta semana?</Label>
             <RadioGroup
               onValueChange={(v) =>
                 setFormData({ ...formData, felt_overwhelmed: v === "si" })
@@ -493,7 +495,8 @@ const SurveyForm = ({ onComplete }: SurveyFormProps) => {
 
           <div className="space-y-2">
             <Label>
-              ¿Sientes que tuviste desinterés en tus actividades usuales?
+              ¿Sientes que tuviste desinterés en tus actividades usuales durante
+              la semana?
             </Label>
             <RadioGroup
               onValueChange={(v) =>
@@ -535,7 +538,9 @@ const SurveyForm = ({ onComplete }: SurveyFormProps) => {
           )}
 
           <div className="space-y-2">
-            <Label>¿Has tenido alguno de estos pensamientos?</Label>
+            <Label>
+              ¿Has tenido alguno de estos pensamientos durante la semana?
+            </Label>
             <div className="space-y-2">
               {[
                 "Sensación de desesperanza marcada",

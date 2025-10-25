@@ -3,13 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/lib/supabase/client";
+import { useAuthStore } from "@/store/auth";
 import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Eye, EyeOff } from "lucide-react";
+
 import {
   Card,
   CardContent,
@@ -23,34 +20,29 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-
   const [passwordError, setPasswordError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
+  const {
+    loading: authLoading,
+    signIn,
+    signUp,
+    signInWithGoogle,
+  } = useAuthStore();
+
   const validatePassword = (pwd: string) => {
     const hasUpperCase = /[A-Z]/.test(pwd);
-
     const hasNumber = /[0-9]/.test(pwd);
     const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(pwd);
     const hasMinLength = pwd.length >= 8;
-    if (!hasMinLength) return "Minimo 8 caracteres";
+    if (!hasMinLength) return "Mínimo 8 caracteres";
     if (!hasUpperCase) return "Debe contener al menos una letra mayúscula";
     if (!hasNumber) return "Debe contener al menos un número";
     if (!hasSpecialChar) return "Debe contener al menos un carácter especial";
     return "";
   };
-
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        navigate("/survey");
-      }
-    };
-    checkSession();
-  }, [navigate]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,48 +55,33 @@ const Auth = () => {
       }
     }
 
-    setLoading(true);
     setPasswordError("");
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
+        await signIn(email, password);
+        navigate("/");
+        toast.success("Sesión iniciada con éxito");
       } else {
-        const { error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
-      }
+        await signUp(email, password);
+        toast.success("Cuenta creada con éxito - Verifica tu email");
 
-      toast.success(
-        isLogin ? "Sesión iniciada con éxito" : "Cuenta creada con éxito"
-      );
-      navigate("/survey");
+        setIsLogin(true);
+        navigate("/auth");
+        setEmail("");
+        setPassword("");
+        setPasswordError("");
+      }
     } catch (error: any) {
       toast.error(error.message || "Ocurrió un error al autenticar");
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleOAuthSignIn = async () => {
-    setLoading(true);
-
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: "https://mindme.vercel.app/auth/callback",
-          skipBrowserRedirect: false,
-        },
-      });
-      if (error) throw error;
+      await signInWithGoogle();
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -145,23 +122,37 @@ const Auth = () => {
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña</Label>
 
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (!isLogin) {
-                    setPasswordError(validatePassword(e.target.value));
-                  }
-                }}
-                required
-                minLength={8}
-                className={`transition-all focus:shadow-sm ${
-                  passwordError ? "border-destructive" : ""
-                }`}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (!isLogin) {
+                      setPasswordError(validatePassword(e.target.value));
+                    }
+                  }}
+                  required
+                  minLength={8}
+                  className={`transition-all focus:shadow-sm pr-10 ${
+                    passwordError ? "border-destructive" : ""
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               {!isLogin && (
                 <div className="text-xs space-y-1 mt-2">
                   <p
@@ -211,9 +202,9 @@ const Auth = () => {
             <Button
               type="submit"
               className="w-full bg-primary hover:opacity-90 transition-opacity"
-              disabled={loading || (!isLogin && passwordError !== "")}
+              disabled={authLoading || (!isLogin && passwordError !== "")}
             >
-              {loading
+              {authLoading
                 ? "Cargando..."
                 : isLogin
                 ? "Iniciar Sesión"
